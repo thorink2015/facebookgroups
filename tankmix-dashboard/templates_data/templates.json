@@ -1,85 +1,85 @@
 {
-  "_README": "STARTER content only. Replace the variant text with YOUR real Tank Mix playbook copy (T1–T8). The link never goes in the body — it goes in the first comment. Categories used: operators, farmer_operators, drone_curious, specialty. Image types: hero, rate_card, quote_card, screenshot. Edit here OR in the Templates tab of the dashboard.",
+  "_README": "Real Tank Mix T1-T8 copy from 03-execution/01-facebook-posting-playbook.md. Brackets like [state] are the only things you swap per post (edit right in the Daily Queue). Link is NEVER in the body: each template ends with a comment-keyword CTA; when someone comments the keyword you reply with the Tank Mix link + DM. Audience buckets: operators, farmer_operators, drone_curious, specialty. Image types: hero, rate_card, quote_card, screenshot.",
   "templates": [
     {
       "code": "T1",
-      "name": "Rate question",
+      "name": "The Rate Question (highest engagement)",
       "audiences": "operators,farmer_operators",
       "image_types": "rate_card,hero",
+      "keyword": "rates",
       "variants": [
-        "What are you charging per acre this season? Curious how the numbers look across regions right now.",
-        "Operators — what's your going rate per acre this year? Trying to get a real picture beyond the usual guesses.",
-        "Spray drone folks: per-acre rate check. What are you actually charging in 2026, and is it holding up against fuel and chem costs?"
+        "Question for the room. What's drone spray going for in your area this year?\n\nPulled the latest numbers from this week and the regional spread is wider than I expected:\n- Corn Belt: $12 to $18\n- Delta: $15 to $21\n- California: $18 to $35\n- Mountain West: $10 to $22\n\nWhat are you guys actually charging or actually paying? Curious what's holding above $15 and what's dropping.\n\n(I track this every Thursday in a free weekly. Reply \"rates\" and I'll send the full breakdown.)",
+        "Real talk on per-acre rates. What's drone spray actually going for where you are right now?\n\nThe spread this week is wider than people think:\n- Corn Belt: $12 to $18\n- Delta: $15 to $21\n- California: $18 to $35\n- Mountain West: $10 to $22\n\nWho's holding above $15, and where is it sliding? Curious what your area looks like.\n\n(I put the full breakdown out every Thursday in a free weekly. Reply \"rates\" and I'll send it.)"
       ]
     },
     {
       "code": "T2",
-      "name": "Gear / setup",
+      "name": "The Plain English Reg Decode",
       "audiences": "operators,drone_curious",
-      "image_types": "hero,quote_card",
+      "image_types": "quote_card,hero",
+      "keyword": "reg",
       "variants": [
-        "What's in your spray rig this season? Drone, mix, nozzles — curious what setups are actually working.",
-        "Building out a spray setup and comparing notes. What gear has earned its place for you, and what did you regret buying?"
+        "Plain English: what the FAA's [latest thing] actually means for solo guys.\n\nThree things changed:\n1. [Bullet]\n2. [Bullet]\n3. [Bullet]\n\nThe part nobody is saying out loud: [the real impact in one sentence].\n\nIf you fly a T40 or T50 part-time for hire, item #2 is the one that bites. The rest is paperwork.\n\n(Decoded this in full this week. Comment \"reg\" and I'll send the breakdown.)"
       ]
     },
     {
       "code": "T3",
-      "name": "Regulation / compliance",
-      "audiences": "operators,farmer_operators",
-      "image_types": "screenshot,hero",
+      "name": "The Photo Story",
+      "audiences": "farmer_operators,specialty,operators",
+      "image_types": "hero",
+      "keyword": "",
       "variants": [
-        "Part 137 / licensing question — how are you handling the paperwork side this year? It's the part nobody warns you about.",
-        "Regs check: what's changed for ag drone operators where you are this season? Trying to keep a running list."
+        "Mixed a hot load at 4am to catch the window before the wind came up. T50 ran clean, 22 acres in 47 minutes, no skips.\n\n[Insert real photo: drone on tailgate at dawn, or mid-spray, or empty tank after job]\n\nThe thing they don't tell you: the run was easy. The truck-and-trailer setup the night before is the actual job.\n\n(Posting the full season log every Thursday in a free weekly. Profile link if you want in.)"
       ]
     },
     {
       "code": "T4",
-      "name": "Tank mix tips",
-      "audiences": "operators,farmer_operators,specialty",
+      "name": "The Farmer-Ask Dual Hook",
+      "audiences": "farmer_operators",
       "image_types": "quote_card,hero",
+      "keyword": "yes",
       "variants": [
-        "Tank mix order matters more than people think. What's your go-to sequence to avoid antagonism in the tank?",
-        "Mixing question: what combos have burned you, and what do you keep separate no matter what?"
+        "Farmers, honest question. Would you hire a drone to spray your corn or soybeans for $15 an acre, or is that high in your area?\n\nAsking because I've been tracking what operators charge and what farmers actually want to pay, and the gap isn't where I thought it'd be.\n\nWhat's the number that makes you call the guy with the drone instead of the co-op?\n\n(Putting this whole breakdown out free on Thursday. Comment \"yes\" and I'll add you to the list.)"
       ]
     },
     {
       "code": "T5",
-      "name": "Results / before-after",
-      "audiences": "farmer_operators,operators",
-      "image_types": "hero,screenshot",
+      "name": "The Tailgate / Send-it-to-a-buddy",
+      "audiences": "operators,farmer_operators,specialty,drone_curious",
+      "image_types": "hero",
+      "keyword": "",
       "variants": [
-        "Field results from this pass came in better than expected. Anyone else seeing a difference going to drone application this year?",
-        "Coverage comparison: drone vs ground rig on the same field. The edges and wet spots are where it really showed."
+        "Found out the hard way this week: dust on the LiDAR sensor reads as terrain. Drone \"followed\" the dust cloud and dropped 4 feet. Cleared a soybean canopy by inches.\n\nWipe your sensors. That's the post.\n\n(More short ones like this every Thursday. Profile link.)"
       ]
     },
     {
       "code": "T6",
-      "name": "New operator intro",
-      "audiences": "drone_curious,operators",
-      "image_types": "hero,quote_card",
+      "name": "The Job Lead / Open Acres",
+      "audiences": "operators",
+      "image_types": "hero",
+      "keyword": "acres",
       "variants": [
-        "Just getting into spray drone work this season. What's the one thing you wish someone told you in year one?",
-        "Starting out in ag drones — what would you prioritize first: hours, licensing, or a bigger tank?"
+        "Open acres post.\n\nHave a farmer in [state] looking for 380 acres of fungicide on R3 soybeans before [date]. Wants a drone, not a plane.\n\nIf you're licensed in [state] and can take the job, DM me and I'll connect you.\n\n(I post the live job board free every Thursday. Reply \"acres\" and I'll add you.)"
       ]
     },
     {
       "code": "T7",
-      "name": "Specialty / niche",
-      "audiences": "specialty",
-      "image_types": "quote_card,hero",
+      "name": "The Honest Gear Take",
+      "audiences": "operators,drone_curious",
+      "image_types": "screenshot,hero",
+      "keyword": "gear",
       "variants": [
-        "For the specialty crowd (food plots, orchards, vineyards) — how are you adapting drone spraying to tighter spaces?",
-        "Niche application question: what's working for the awkward fields the big rigs can't reach well?"
+        "T40 vs T50 vs Hylio AG-272: blunt take from guys actually flying them.\n\nT40: cheapest to enter, tank too small for big fields, battery economy is fine\nT50: 50% bigger payload, real workhorse, the battery costs eat you\nHylio AG-272: NDAA compliant which matters more every month, swarm-fly capable, support thinner\n\nThe one nobody talks about: parts wait time. DJI is 3 to 4 weeks. Hylio is 10 days but you pay for it.\n\n(Full teardown with my own numbers in the weekly. Comment \"gear\" and I'll send.)"
       ]
     },
     {
       "code": "T8",
-      "name": "DJI ban / market shift",
+      "name": "The DJI Ban / China Watch",
       "audiences": "operators,drone_curious",
-      "image_types": "hero,screenshot",
+      "image_types": "quote_card,hero,screenshot",
+      "keyword": "DJI",
       "variants": [
-        "With all the DJI uncertainty, what's your backup plan on hardware? Curious who's already switching and to what.",
-        "If DJI gets restricted, how big a hit is that to your operation? Trying to gauge how exposed everyone actually is."
+        "Latest on the DJI ban in 60 seconds.\n\nWhat changed this week: [specific update]\nWhat it means if you fly an Agras: [practical impact]\nWhat it means if you're shopping: [buy now vs wait]\n\nThe part the trade press is missing: [your angle, from Tank Mix].\n\n(Tracking this every week. Comment \"DJI\" and I'll send the running file.)"
       ]
     }
   ]

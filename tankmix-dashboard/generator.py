@@ -62,14 +62,21 @@ def _eligible_groups(db, cooldown_days):
     return eligible
 
 
-def _pick_template(db, category):
-    """Pick an active template whose audiences include the group's category."""
-    templates = db.execute(
-        "SELECT * FROM templates WHERE active = 1"
-    ).fetchall()
+def _pick_template(db, group):
+    """Pick a template for a group. Honor the CSV's recommended_template first;
+    otherwise match an active template whose audiences include the group's
+    category; otherwise fall back to any active template."""
+    templates = db.execute("SELECT * FROM templates WHERE active = 1").fetchall()
     if not templates:
         return None
-    cat = (category or "").strip().lower()
+    # 1. Research-recommended template for this specific group.
+    rec = (group["rec_template"] or "").strip().upper() if "rec_template" in group.keys() else ""
+    if rec:
+        for t in templates:
+            if (t["code"] or "").strip().upper() == rec:
+                return t
+    # 2. Audience-bucket match.
+    cat = (group["category"] or "").strip().lower()
     matching = [
         t for t in templates
         if cat and cat in [a.strip().lower() for a in (t["audiences"] or "").split(",") if a.strip()]
@@ -133,7 +140,7 @@ def generate_queue(count=None):
         for g in groups:
             if created >= count:
                 break
-            template = _pick_template(db, g["category"])
+            template = _pick_template(db, g)
             if not template:
                 warnings.append("No active templates exist. Add at least one template + variant.")
                 break

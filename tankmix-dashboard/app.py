@@ -229,24 +229,36 @@ def import_groups():
         return jsonify({"error": "No file uploaded."}), 400
     data = request.files["file"].read()
     parsed = parse_groups_csv(data)
-    added = skipped = 0
+    added = skipped = active_added = 0
+    NON_POSTING = {"partner", "editorial", "decision_influencer"}
     with get_db() as d:
         for item in parsed:
             url, slug = canonicalize_group_url(item["url"])
             if not url:
                 skipped += 1
                 continue
+            tier = (item.get("tier") or "").upper()
+            archetype = item.get("category") or "uncategorized"
+            # Posting focus per the playbook: tier C ("skip") and non-posting
+            # archetypes (partners/editorial/decision-influencers) come in but are
+            # marked INACTIVE, so the rotation only uses your A/B posting groups.
+            active = 0 if (tier == "C" or archetype in NON_POSTING) else 1
             try:
                 d.execute(
-                    "INSERT INTO groups(url, name, category, fb_id, notes) "
-                    "VALUES (?, ?, ?, ?, ?)",
-                    (url, item.get("name", ""), item.get("category") or "uncategorized",
-                     slug, item.get("notes", "")))
+                    "INSERT INTO groups(url, name, category, fb_id, notes, tier, "
+                    "rec_template, keyword, pitch_angle, red_flag, active) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (url, item.get("name", ""), archetype, slug, item.get("notes", ""),
+                     tier, item.get("rec_template", ""), item.get("keyword", ""),
+                     item.get("pitch_angle", ""), item.get("red_flag", ""), active))
                 added += 1
+                active_added += active
             except Exception:
                 skipped += 1  # already present
-    log_event(f"CSV import: {added} added, {skipped} skipped (duplicates/blank).", "info")
-    return jsonify({"added": added, "skipped": skipped, "parsed": len(parsed)})
+    log_event(f"CSV import: {added} added ({active_added} active), "
+              f"{skipped} skipped (duplicates/blank).", "info")
+    return jsonify({"added": added, "active_added": active_added,
+                    "skipped": skipped, "parsed": len(parsed)})
 
 
 # --------------------------------------------------------------------------- #
@@ -272,10 +284,10 @@ def add_template():
     with get_db() as d:
         try:
             cur = d.execute(
-                "INSERT INTO templates(code, name, audiences, image_types) "
-                "VALUES (?, ?, ?, ?)",
+                "INSERT INTO templates(code, name, audiences, image_types, keyword) "
+                "VALUES (?, ?, ?, ?, ?)",
                 (code, data.get("name", ""), data.get("audiences", ""),
-                 data.get("image_types", "")))
+                 data.get("image_types", ""), data.get("keyword", "")))
             tid = cur.lastrowid
         except Exception:
             return jsonify({"error": "A template with that code already exists."}), 409
@@ -290,7 +302,7 @@ def edit_template(tid):
         return jsonify({"ok": True})
     data = request.get_json(force=True) or {}
     fields, vals = [], []
-    for key in ("code", "name", "audiences", "image_types", "active"):
+    for key in ("code", "name", "audiences", "image_types", "keyword", "active"):
         if key in data:
             fields.append(f"{key}=?")
             vals.append(data[key])
@@ -401,7 +413,10 @@ def _queue_rows(d, status_filter):
     return rows(d.execute(
         f"""SELECT p.*,
                    g.name AS group_name, g.url AS group_url, g.category,
+                   g.tier, g.rec_template, g.pitch_angle, g.red_flag,
+                   g.keyword AS group_keyword,
                    t.code AS template_code, t.name AS template_name,
+                   t.keyword AS template_keyword,
                    i.filename AS image_filename, i.image_type AS image_type,
                    i.caption AS image_caption
             FROM posts p

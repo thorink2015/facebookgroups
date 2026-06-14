@@ -186,13 +186,22 @@ async function renderQueue() {
     const img = it.image_filename
       ? `<img class="qimg" src="/images/${encodeURIComponent(it.image_filename)}" title="${esc(it.image_type||"")}">`
       : `<div class="qimg placeholder">no image<br>matched</div>`;
+    const flag = it.red_flag
+      ? `<div class="callout warn" style="margin:0 0 12px;">⚠️ Pre-flight: ${esc(it.red_flag)}</div>` : "";
+    const pitch = it.pitch_angle
+      ? `<div class="muted" style="font-size:12.5px;margin-top:3px;">🎯 ${esc(it.pitch_angle)}</div>` : "";
+    const tierBadge = it.tier ? `<span class="badge gray">tier ${esc(it.tier)}</span>` : "";
+    const kw = it.group_keyword || it.template_keyword || "";
     return `
     <div class="qcard" id="q-${it.id}">
+      ${flag}
       <div class="qhead">
         <div>
           <b>${esc(it.group_name || it.group_url)}</b>
           <span class="badge cat">${esc(it.category || "—")}</span>
           <span class="badge gray">${esc(it.template_code || "—")}</span>
+          ${tierBadge}
+          ${pitch}
         </div>
         <a class="btn sm" href="${esc(it.group_url)}" target="_blank">Open group ↗</a>
       </div>
@@ -203,7 +212,7 @@ async function renderQueue() {
         </div>
         <div>
           <textarea id="copy-${it.id}" onblur="saveCopy(${it.id})">${esc(it.copy_text || "")}</textarea>
-          <div class="first-comment">💬 <b>First comment</b> (paste after the post is live): ${esc(firstComment)}</div>
+          <div class="first-comment">💬 <b>Link drop</b> — keep it out of the post body.${kw ? ` When someone comments <b>"${esc(kw)}"</b>, reply + DM them:` : " Reply / DM commenters with:"} ${esc(firstComment)}</div>
           <div class="qactions">
             <button class="btn sm primary" onclick="copyOnly(${it.id})">📋 Copy post text</button>
             <button class="btn sm" onclick="copyFirstComment()">📋 Copy first comment</button>
@@ -293,7 +302,7 @@ function groupRows(groups) {
   return groups.map(g => `
     <tr data-name="${esc((g.name||"").toLowerCase())} ${esc((g.url||"").toLowerCase())} ${esc((g.category||"").toLowerCase())}" data-cat="${esc(g.category||"")}">
       <td>${esc(g.name || "(unnamed)")}</td>
-      <td><span class="badge cat">${esc(g.category||"—")}</span></td>
+      <td><span class="badge cat">${esc(g.category||"—")}</span>${g.tier?` <span class="badge gray">${esc(g.tier)}</span>`:""}${g.active?"":' <span class="badge gray">off</span>'}</td>
       <td>${fmtDate(g.last_posted)}</td>
       <td>${g.post_count || 0}</td>
       <td><a href="${esc(g.url)}" target="_blank">open ↗</a></td>
@@ -315,7 +324,7 @@ window.importCsv = async (input) => {
   const fd = new FormData(); fd.append("file", input.files[0]);
   try {
     const r = await api("/api/groups/import", { method: "POST", body: fd });
-    toast(`Imported ${r.added} groups (${r.skipped} skipped)`);
+    toast(`Imported ${r.added} groups · ${r.active_added} active · ${r.skipped} skipped`);
     renderGroups();
   } catch (e) { toast(e.message, true); }
   input.value = "";
@@ -360,7 +369,7 @@ async function renderTemplates() {
           <button class="btn sm danger" onclick="deleteTemplate(${t.id})">Delete</button>
         </div>
       </div>
-      <p class="sec-sub">Audiences: <b>${esc(t.audiences||"any")}</b> · Image types: <b>${esc(t.image_types||"any")}</b></p>
+      <p class="sec-sub">Audiences: <b>${esc(t.audiences||"any")}</b> · Image types: <b>${esc(t.image_types||"any")}</b> · Keyword: <b>${esc(t.keyword||"—")}</b></p>
       <table><tbody>
         ${t.variants.map(v => `<tr>
           <td style="width:100%;">${esc(v.text)}</td>
@@ -387,11 +396,12 @@ function templateForm(t) {
     <label class="field"><span>Name</span><input type="text" id="t-name" value="${esc(t.name||"")}"></label>
     <label class="field"><span>Audiences (comma separated)</span><input type="text" id="t-aud" value="${esc(t.audiences||"")}" placeholder="operators,farmer_operators"></label>
     <label class="field"><span>Image types (comma separated)</span><input type="text" id="t-img" value="${esc(t.image_types||"")}" placeholder="hero,rate_card"></label>
+    <label class="field"><span>Keyword (comment CTA for the link)</span><input type="text" id="t-kw" value="${esc(t.keyword||"")}" placeholder="rates"></label>
     <div class="row"><button class="btn primary" onclick="${t.id?`saveEditTemplate(${t.id})`:'saveNewTemplate()'}">Save</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>`;
 }
 window.saveNewTemplate = async () => {
   try {
-    await postJSON("/api/templates", { code: $("#t-code").value, name: $("#t-name").value, audiences: $("#t-aud").value, image_types: $("#t-img").value });
+    await postJSON("/api/templates", { code: $("#t-code").value, name: $("#t-name").value, audiences: $("#t-aud").value, image_types: $("#t-img").value, keyword: $("#t-kw").value });
     closeModal(); toast("Template added"); renderTemplates();
   } catch (e) { toast(e.message, true); }
 };
@@ -400,7 +410,7 @@ window.editTemplateModal = async (id) => {
   openModal("Edit template", templateForm(t));
 };
 window.saveEditTemplate = async (id) => {
-  await patchJSON(`/api/templates/${id}`, { code: $("#t-code").value, name: $("#t-name").value, audiences: $("#t-aud").value, image_types: $("#t-img").value });
+  await patchJSON(`/api/templates/${id}`, { code: $("#t-code").value, name: $("#t-name").value, audiences: $("#t-aud").value, image_types: $("#t-img").value, keyword: $("#t-kw").value });
   closeModal(); toast("Saved"); renderTemplates();
 };
 window.deleteTemplate = async (id) => { if (!confirm("Delete this template and all its variants?")) return; await del(`/api/templates/${id}`); renderTemplates(); };
