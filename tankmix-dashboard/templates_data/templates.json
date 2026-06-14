@@ -1,0 +1,86 @@
+{
+  "_README": "STARTER content only. Replace the variant text with YOUR real Tank Mix playbook copy (T1–T8). The link never goes in the body — it goes in the first comment. Categories used: operators, farmer_operators, drone_curious, specialty. Image types: hero, rate_card, quote_card, screenshot. Edit here OR in the Templates tab of the dashboard.",
+  "templates": [
+    {
+      "code": "T1",
+      "name": "Rate question",
+      "audiences": "operators,farmer_operators",
+      "image_types": "rate_card,hero",
+      "variants": [
+        "What are you charging per acre this season? Curious how the numbers look across regions right now.",
+        "Operators — what's your going rate per acre this year? Trying to get a real picture beyond the usual guesses.",
+        "Spray drone folks: per-acre rate check. What are you actually charging in 2026, and is it holding up against fuel and chem costs?"
+      ]
+    },
+    {
+      "code": "T2",
+      "name": "Gear / setup",
+      "audiences": "operators,drone_curious",
+      "image_types": "hero,quote_card",
+      "variants": [
+        "What's in your spray rig this season? Drone, mix, nozzles — curious what setups are actually working.",
+        "Building out a spray setup and comparing notes. What gear has earned its place for you, and what did you regret buying?"
+      ]
+    },
+    {
+      "code": "T3",
+      "name": "Regulation / compliance",
+      "audiences": "operators,farmer_operators",
+      "image_types": "screenshot,hero",
+      "variants": [
+        "Part 137 / licensing question — how are you handling the paperwork side this year? It's the part nobody warns you about.",
+        "Regs check: what's changed for ag drone operators where you are this season? Trying to keep a running list."
+      ]
+    },
+    {
+      "code": "T4",
+      "name": "Tank mix tips",
+      "audiences": "operators,farmer_operators,specialty",
+      "image_types": "quote_card,hero",
+      "variants": [
+        "Tank mix order matters more than people think. What's your go-to sequence to avoid antagonism in the tank?",
+        "Mixing question: what combos have burned you, and what do you keep separate no matter what?"
+      ]
+    },
+    {
+      "code": "T5",
+      "name": "Results / before-after",
+      "audiences": "farmer_operators,operators",
+      "image_types": "hero,screenshot",
+      "variants": [
+        "Field results from this pass came in better than expected. Anyone else seeing a difference going to drone application this year?",
+        "Coverage comparison: drone vs ground rig on the same field. The edges and wet spots are where it really showed."
+      ]
+    },
+    {
+      "code": "T6",
+      "name": "New operator intro",
+      "audiences": "drone_curious,operators",
+      "image_types": "hero,quote_card",
+      "variants": [
+        "Just getting into spray drone work this season. What's the one thing you wish someone told you in year one?",
+        "Starting out in ag drones — what would you prioritize first: hours, licensing, or a bigger tank?"
+      ]
+    },
+    {
+      "code": "T7",
+      "name": "Specialty / niche",
+      "audiences": "specialty",
+      "image_types": "quote_card,hero",
+      "variants": [
+        "For the specialty crowd (food plots, orchards, vineyards) — how are you adapting drone spraying to tighter spaces?",
+        "Niche application question: what's working for the awkward fields the big rigs can't reach well?"
+      ]
+    },
+    {
+      "code": "T8",
+      "name": "DJI ban / market shift",
+      "audiences": "operators,drone_curious",
+      "image_types": "hero,screenshot",
+      "variants": [
+        "With all the DJI uncertainty, what's your backup plan on hardware? Curious who's already switching and to what.",
+        "If DJI gets restricted, how big a hit is that to your operation? Trying to gauge how exposed everyone actually is."
+      ]
+    }
+  ]
+}

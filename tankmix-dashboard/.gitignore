@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Local database (recreated by seed.py) — never commit your real data
+data/tankmix.db
+data/tankmix.db-journal
+data/tankmix.db-wal
+
+# Uploaded images (your own assets; keep them out of git by default)
+data/images/*
+!data/images/.gitkeep
+
+# NOTE: docs/research/ and docs/uploads/ are intentionally NOT ignored, so the
+# documents you upload there get saved to GitHub as you asked.
+
+# OS noise
+.DS_Store
+Thumbs.db

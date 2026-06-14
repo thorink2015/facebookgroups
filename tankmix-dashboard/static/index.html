@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tank Mix — Campaign Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">TM</div>
+        <div>
+          <div class="brand-title">Tank Mix</div>
+          <div class="brand-sub">Campaign Dashboard</div>
+        </div>
+      </div>
+      <nav id="nav">
+        <button data-view="overview" class="nav-item active">📊 Overview</button>
+        <button data-view="queue" class="nav-item">✅ Daily Queue</button>
+        <button data-view="groups" class="nav-item">👥 Groups</button>
+        <button data-view="templates" class="nav-item">📝 Templates</button>
+        <button data-view="images" class="nav-item">🖼️ Images</button>
+        <button data-view="history" class="nav-item">🕓 History</button>
+        <button data-view="settings" class="nav-item">⚙️ Settings</button>
+        <button data-view="logs" class="nav-item">📜 Logs</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="dot" id="health-dot"></span>
+        <span id="health-text">connecting…</span>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">Overview</h1>
+          <p id="view-sub" class="muted"></p>
+        </div>
+        <div class="topbar-right">
+          <span id="status-pill" class="pill pill-idle">idle</span>
+        </div>
+      </header>
+      <section id="view" class="view"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Reusable modal -->
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modal-title">Title</h3>
+        <button class="icon-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
