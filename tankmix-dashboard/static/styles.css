@@ -160,6 +160,8 @@ tr:hover td { background: #fafbfa; }
 .modal-head h3 { margin: 0; font-size: 16px; }
 .modal-body { padding: 20px; }
 
+.countdown { font-size: 54px; font-weight: 700; color: var(--accent-dark); margin: 10px 0; font-variant-numeric: tabular-nums; }
+
 .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
 .empty .big { font-size: 30px; }
 code.inline { background: #eef0ee; padding: 1px 6px; border-radius: 5px; font-size: 13px; }

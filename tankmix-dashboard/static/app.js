@@ -73,6 +73,7 @@ const RENDER = {
   settings: renderSettings, logs: renderLogs,
 };
 function go(name) {
+  _stopSession();  // leaving the queue/session view: kill any pacing timer
   document.querySelectorAll(".nav-item").forEach(b =>
     b.classList.toggle("active", b.dataset.view === name));
   $("#view-title").textContent = TITLES[name][0];
@@ -164,6 +165,7 @@ async function renderQueue() {
           <label class="field" style="margin:0;"><span>How many to generate</span>
             <input type="number" id="gen-count" value="${esc(target)}" min="1" style="width:90px;"></label>
           <button class="btn primary" onclick="doGenerate()">⚡ Generate queue</button>
+          ${items.length ? '<button class="btn primary" onclick="startSession()">▶ Start posting session</button>' : ''}
           <button class="btn ghost" onclick="clearQueue()">Clear queue</button>
         </div>
         <div class="muted">${items.length} planned</div>
@@ -264,6 +266,151 @@ window.confirmPosted = async (id) => {
     notes: $("#mp-notes").value,
   });
   closeModal(); toast("Logged as posted ✅"); renderQueue();
+};
+
+// ---- SESSION MODE (guided one-at-a-time posting) -------------------------
+// Walks you group by group: copies the text + image to your clipboard and opens
+// the group, you paste + post in Facebook yourself, then it paces the next one
+// with a randomized human gap. No Facebook automation — just removes the busywork.
+let SESSION = null;
+
+function _stopSession() {
+  if (SESSION && SESSION.timer) { clearInterval(SESSION.timer); SESSION.timer = null; }
+}
+function sessionFirstComment() {
+  const s = SESSION.settings;
+  const link = s.newsletter_link || "[set your link in Settings]";
+  return (s.first_comment_text || "{link}").replace("{link}", link);
+}
+window.copySessionFC = () => copyText(sessionFirstComment());
+
+window.startSession = async () => {
+  const [items, settings] = await Promise.all([getJSON("/api/queue"), getJSON("/api/settings")]);
+  if (!items.length) { toast("Nothing in the queue — generate first", true); return; }
+  SESSION = { items, idx: 0, posted: 0, settings, timer: null, phase: "item", nextAt: 0 };
+  renderSession();
+};
+window.sessionExit = () => { _stopSession(); SESSION = null; go("queue"); };
+
+function renderSession() {
+  const pill = $("#status-pill");
+  pill.className = "pill pill-ready"; pill.textContent = "session";
+  if (!SESSION || SESSION.idx >= SESSION.items.length) return renderSessionDone();
+  return SESSION.phase === "wait" ? renderSessionWait() : renderSessionItem();
+}
+
+function renderSessionItem() {
+  const it = SESSION.items[SESSION.idx];
+  const total = SESSION.items.length;
+  const kw = it.group_keyword || it.template_keyword || "";
+  const flag = it.red_flag ? `<div class="callout warn">⚠️ Pre-flight: ${esc(it.red_flag)}</div>` : "";
+  const img = it.image_filename
+    ? `<img class="qimg" style="width:160px;height:160px;" src="/images/${encodeURIComponent(it.image_filename)}">`
+    : `<div class="qimg placeholder" style="width:160px;height:160px;">no image<br>matched</div>`;
+  view.innerHTML = `
+    <div class="row between" style="margin-bottom:12px;">
+      <div><b>Post ${SESSION.idx + 1} of ${total}</b> · <span class="muted">${SESSION.posted} done this session</span></div>
+      <button class="btn ghost" onclick="sessionExit()">✕ Exit session</button>
+    </div>
+    <div class="progress" style="margin-bottom:16px;"><div style="width:${Math.round(100*SESSION.idx/total)}%"></div></div>
+    <div class="card">
+      ${flag}
+      <div class="row between">
+        <div><b style="font-size:16px;">${esc(it.group_name || it.group_url)}</b>
+          <span class="badge cat">${esc(it.category||"—")}</span>
+          <span class="badge gray">${esc(it.template_code||"—")}</span>
+          ${it.tier?`<span class="badge gray">tier ${esc(it.tier)}</span>`:""}</div>
+        <a class="btn primary" href="${esc(it.group_url)}" target="_blank" onclick="copyText(document.getElementById('sess-copy').value)">📋➜ Copy text + open group ↗</a>
+      </div>
+      ${it.pitch_angle?`<div class="muted" style="margin:6px 0;">🎯 ${esc(it.pitch_angle)}</div>`:""}
+      <div class="qbody" style="margin-top:12px;">
+        <div>${img}
+          ${it.image_filename?`<button class="btn sm" style="margin-top:8px;width:160px;justify-content:center;" onclick="copyImage('${esc(it.image_filename)}')">📋 Copy image</button>`:""}
+        </div>
+        <div>
+          <textarea id="sess-copy" style="min-height:150px;" onblur="saveCopy(${it.id})">${esc(it.copy_text||"")}</textarea>
+          <div class="first-comment">💬 <b>Link drop</b> — keep it out of the post.${kw?` When someone comments <b>"${esc(kw)}"</b>, reply + DM:`:" Reply / DM commenters with:"} ${esc(sessionFirstComment())}
+            <button class="btn sm" style="margin-left:6px;" onclick="copySessionFC()">copy</button></div>
+          <div class="qactions" style="margin-top:14px;">
+            <button class="btn primary" onclick="sessionPosted(${it.id})">✅ Posted — next</button>
+            <button class="btn ghost" onclick="sessionSkip(${it.id})">Skip</button>
+          </div>
+          <div class="muted" style="margin-top:8px;font-size:12.5px;">In the group: click the composer, paste text (Cmd/Ctrl+V), paste the image (Cmd/Ctrl+V), then Post. Once it's live, reply to the keyword with your link.</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+window.sessionPosted = async (id) => {
+  try { await postJSON(`/api/posts/${id}/status`, { status: "posted" }); } catch (e) { toast(e.message, true); }
+  SESSION.posted++; SESSION.idx++;
+  if (SESSION.idx >= SESSION.items.length) return renderSessionDone();
+  // Randomized human pacing gap based on your min_gap_minutes setting.
+  const base = (parseFloat(SESSION.settings.min_gap_minutes) || 8) * 60;
+  const gap = Math.max(60, Math.round(base * (0.7 + Math.random() * 0.9)));  // 0.7x–1.6x, never repeats exactly
+  SESSION.nextAt = Date.now() + gap * 1000;
+  SESSION.phase = "wait";
+  _stopSession();
+  SESSION.timer = setInterval(tickWait, 1000);
+  renderSession();
+};
+window.sessionSkip = async (id) => {
+  try { await postJSON(`/api/posts/${id}/status`, { status: "skipped" }); } catch (e) {}
+  SESSION.idx++; SESSION.phase = "item"; renderSession();
+};
+window.sessionAdvance = () => { _stopSession(); SESSION.phase = "item"; renderSession(); };
+
+function renderSessionWait() {
+  const next = SESSION.items[SESSION.idx];
+  view.innerHTML = `
+    <div class="row between" style="margin-bottom:12px;">
+      <div><b>${SESSION.posted} posted</b> · ${SESSION.items.length - SESSION.idx} to go</div>
+      <button class="btn ghost" onclick="sessionExit()">✕ Exit session</button>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="muted">Pacing break — keeps it human and avoids rate flags</div>
+      <div class="countdown" id="cd">--:--</div>
+      <div class="muted" style="margin-bottom:14px;">Next up: <b>${esc(next.group_name || next.group_url)}</b></div>
+      <button class="btn primary" onclick="sessionAdvance()">Skip the wait — do next now →</button>
+    </div>`;
+  tickWait();
+}
+function tickWait() {
+  if (!SESSION || SESSION.phase !== "wait") return;
+  const ms = SESSION.nextAt - Date.now();
+  if (ms <= 0) { _stopSession(); sessionAdvance(); return; }
+  const s = Math.ceil(ms / 1000);
+  const el = document.getElementById("cd");
+  if (el) el.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+}
+
+function renderSessionDone() {
+  _stopSession();
+  const pill = $("#status-pill"); pill.className = "pill pill-idle"; pill.textContent = "idle";
+  const posted = SESSION ? SESSION.posted : 0;
+  view.innerHTML = `<div class="empty"><div class="big">✅</div>
+    <p><b>Session complete.</b> You posted ${posted} this session.</p>
+    <button class="btn primary" onclick="sessionExit()">Back to queue</button></div>`;
+}
+
+// Copy an image to the clipboard (so you can paste it straight into the FB
+// composer). Falls back to a download if the browser blocks clipboard images.
+window.copyImage = async (filename) => {
+  try {
+    const resp = await fetch("/images/" + encodeURIComponent(filename));
+    const blob = await resp.blob();
+    const bmp = await createImageBitmap(blob);
+    const canvas = document.createElement("canvas");
+    canvas.width = bmp.width; canvas.height = bmp.height;
+    canvas.getContext("2d").drawImage(bmp, 0, 0);
+    const png = await new Promise(r => canvas.toBlob(r, "image/png"));
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
+    toast("Image copied — paste into the composer (Cmd/Ctrl+V)");
+  } catch (e) {
+    const a = document.createElement("a");
+    a.href = "/images/" + encodeURIComponent(filename); a.download = filename; a.click();
+    toast("Clipboard images not supported here — downloaded instead");
+  }
 };
 
 // ---- GROUPS --------------------------------------------------------------
