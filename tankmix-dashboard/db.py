@@ -12,22 +12,28 @@ import config
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS groups (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    url         TEXT UNIQUE NOT NULL,
-    name        TEXT,
-    category    TEXT DEFAULT 'uncategorized',
-    fb_id       TEXT,
-    notes       TEXT,
-    active      INTEGER DEFAULT 1,
-    created_at  TEXT DEFAULT (datetime('now'))
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    url          TEXT UNIQUE NOT NULL,
+    name         TEXT,
+    category     TEXT DEFAULT 'uncategorized',  -- audience bucket
+    fb_id        TEXT,
+    notes        TEXT,
+    tier         TEXT,        -- A / B / C from the enriched CSV (final_tier)
+    rec_template TEXT,        -- recommended template code (e.g. T2) for this group
+    keyword      TEXT,        -- recommended comment-keyword CTA for this group
+    pitch_angle  TEXT,        -- best content angle for this specific group
+    red_flag     TEXT,        -- pre-flight warning for this group
+    active       INTEGER DEFAULT 1,
+    created_at   TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS templates (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     code        TEXT UNIQUE NOT NULL,
     name        TEXT,
-    audiences   TEXT,        -- comma separated categories this template fits
+    audiences   TEXT,        -- comma separated audience buckets this template fits
     image_types TEXT,        -- comma separated image types this template uses
+    keyword     TEXT,        -- default comment-keyword CTA for this template
     active      INTEGER DEFAULT 1
 );
 
@@ -105,12 +111,29 @@ def get_db():
         conn.close()
 
 
+# Columns added after the first release. Safe to run every startup: we only add
+# a column if it's missing, so older databases get upgraded without losing data.
+_MIGRATIONS = {
+    "groups": ["tier", "rec_template", "keyword", "pitch_angle", "red_flag"],
+    "templates": ["keyword"],
+}
+
+
+def _migrate(db):
+    for table, columns in _MIGRATIONS.items():
+        existing = {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}
+        for col in columns:
+            if col not in existing:
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {col} TEXT")
+
+
 def init_db():
-    """Create tables and default settings if they do not exist yet."""
+    """Create tables, run migrations, and set default settings if missing."""
     os.makedirs(config.DATA_DIR, exist_ok=True)
     os.makedirs(config.IMAGES_DIR, exist_ok=True)
     with get_db() as db:
         db.executescript(SCHEMA)
+        _migrate(db)
         for key, value in config.DEFAULT_SETTINGS.items():
             db.execute(
                 "INSERT OR IGNORE INTO settings(key, value) VALUES (?, ?)",

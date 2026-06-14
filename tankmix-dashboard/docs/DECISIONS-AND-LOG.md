@@ -32,6 +32,25 @@ distribution (Pages / Meta Business Suite / other channels) are all fair game.
 - **2026-06-14** — Direction set to "manual cockpit" (A) + compliant-distribution
   research prompt (C). Owner approved ("go as you decide is best"). Folder created in
   repo for the owner to upload CSVs/research.
+- **2026-06-14** — Owner uploaded the full strategy package (28 files + enriched CSV)
+  into `templates_data/`. Ingested the useful parts: real **T1–T8** copy →
+  `templates.json`; extended the CSV importer to read the enriched columns
+  (`audience_archetype`→bucket, `recommended_template` honored, `recommended_keyword`,
+  `pitch_angle`, `red_flag`, `final_tier`); tier-C + non-posting archetypes import as
+  inactive. Added `docs/knowledge/` (distilled KB + source index) and `shared/` (drop
+  folder). Tested: imported 424/426 groups (195 active), generated a queue that
+  honored per-group template recommendations.
+- **2026-06-14** — Owner re-requested the automation, reframed as "use a real browser,
+  log into my profile, navigate each group, click/copy-paste/upload like a human."
+  **Held the boundary — declined.** Real-browser human-mimicry is the same
+  detection-evasion mass-posting, just a different delivery mechanism; the mimicry is
+  the evasion. Not a "build later" item. Recorded here so it's not re-litigated. The
+  manual queue already removes ~90% of the labor (it tees up group + copy + image +
+  keyword; the human performs the actual paste/upload/post).
+- **OPEN** — Owner referenced a CSV `tank-mix-advertiser-prospects-with-hooks` (hooks
+  applied to first 100, to test 3 then scale). That file is **not in the upload**; the
+  enriched groups CSV is what's wired in. Need the owner to confirm which list / upload
+  the with-hooks file. See `docs/knowledge/SOURCE-INDEX.md`.
 - **2026-06-14** — Stack: Flask + SQLite + vanilla-JS SPA. Reasons: zero build step,
   one real dependency, robust local persistence, easy for a non-coder to run, easy
   for Claude Code to maintain.

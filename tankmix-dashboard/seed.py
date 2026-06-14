@@ -28,10 +28,10 @@ def seed_templates():
             return
         for t in data.get("templates", []):
             cur = d.execute(
-                "INSERT INTO templates(code, name, audiences, image_types) "
-                "VALUES (?, ?, ?, ?)",
+                "INSERT INTO templates(code, name, audiences, image_types, keyword) "
+                "VALUES (?, ?, ?, ?, ?)",
                 (t["code"], t.get("name", ""), t.get("audiences", ""),
-                 t.get("image_types", "")))
+                 t.get("image_types", ""), t.get("keyword", "")))
             tid = cur.lastrowid
             n_t += 1
             for v in t.get("variants", []):
